@@ -107,7 +107,7 @@ static CGFloat const kIpadGroupedTableViewSideInset = 40;
 
 - (void)viewDidLoad
 {
-    self.buttonNames = @[ @"Complete", @"Prioritize", @"Update", @"Delete" ];
+    self.buttonNames = @[ @"Complete", @"Pause", @"Prioritize", @"Update", @"Delete" ];
     self.completedButtonNames = @[ @"Undo Complete", @"Delete" ];
 }
 
@@ -268,13 +268,16 @@ static CGFloat const kIpadGroupedTableViewSideInset = 40;
 			case 0: // Complete
 				[self didTapCompleteButton];
 				break;
-			case 1: // Prioritize
+            case 1: // Pause
+                [self didTapPauseButton];
+                break;
+			case 2: // Prioritize
 				[self didTapPrioritizeButton];
 				break;
-			case 2: // Update
+			case 3: // Update
 				[self didTapUpdateButton];
 				break;
-			case 3: // Delete
+			case 4: // Delete
 				[self didTapDeleteButton];
 				break;
 				
@@ -330,6 +333,16 @@ static CGFloat const kIpadGroupedTableViewSideInset = 40;
 	[self.appDelegate pushToRemoteWithCompletion:nil];
 }
 
+- (void) pauseTask {
+    id<TaskBag> taskBag = self.appDelegate.taskBag;
+    Task* task = self.task;
+    [task togglePause];
+    [taskBag update:task];
+
+    [self.appDelegate pushToRemote];
+	[self performSelectorOnMainThread:@selector(reloadViewData) withObject:nil waitUntilDone:NO];
+}
+
 - (void) prioritizeTask:(Priority*)selectedPriority {
 	id<TaskBag> taskBag = self.appDelegate.taskBag;
 	Task* task = self.task;
@@ -351,6 +364,12 @@ static CGFloat const kIpadGroupedTableViewSideInset = 40;
 	}
     //TODO: progress dialog
 	[AsyncTask runTask:@selector(completeTask) onTarget:self];	
+}
+
+- (void) didTapPauseButton {
+    NSLog(@"didTapPauseButton called");
+    Task* task = [self task];
+    [AsyncTask runTask:@selector(pauseTask) onTarget:self];
 }
 
 - (void) didTapPrioritizeButton {

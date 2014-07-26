@@ -273,6 +273,14 @@ static NSString * const kLoginScreenSegueNotAnimatedIdentifier = @"LoginScreenSe
     return NO;
 }
 
+- (void)applicationSignificantTimeChange:(UIApplication *)application
+{
+    for (Task *t in [self.taskBag tasksWithFilter:nil withSortOrder:nil]) {
+        [t updateOnSignificantTimeChange];
+    }
+	[[NSNotificationCenter defaultCenter] postNotificationName: kTodoChangedNotification object: nil];
+}
+
 #pragma mark -
 #pragma mark Remote functions
 

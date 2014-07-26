@@ -40,6 +40,7 @@
 				<string>Incomplete tasks</string>
 				<string>Prioritized tasks</string>
 				<string>Priority A tasks</string>
+				<string>Upcoming tasks</string>
 			</array>
 			<key>Type</key>
 			<string>PSMultiValueSpecifier</string>
@@ -49,6 +50,7 @@
 				<string>any</string>
 				<string>anyPriority</string>
 				<string>priorityA</string>
+				<string>upcoming</string>
 			</array>
 		</dict>
 		<dict>

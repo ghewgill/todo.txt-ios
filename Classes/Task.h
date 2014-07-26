@@ -73,6 +73,10 @@
 @property (nonatomic, readonly) NSString *relativeAge;
 @property (nonatomic, readonly) NSArray *contexts;
 @property (nonatomic, readonly) NSArray *projects;
+@property (nonatomic, readonly) BOOL isDue;
+@property (nonatomic, readonly) BOOL isOverdue;
+@property (nonatomic, readonly) BOOL isWayOverdue;
+@property (nonatomic, readonly) BOOL isPaused;
 
 @property (nonatomic, weak) Priority *priority;
 
@@ -81,6 +85,7 @@
 - (void)update:(NSString*)rawText;
 - (void)markComplete:(NSDate*)date;
 - (void)markIncomplete;
+- (void)togglePause;
 - (void)deleteTask;
 - (NSString*)inScreenFormat;
 - (NSString*)inFileFormat;
@@ -93,5 +98,7 @@
 - (NSComparisonResult) compareByTextAscending:(Task*)other;
 - (NSArray *)rangesOfContexts:(NSString *)taskText;
 - (NSArray *)rangesOfProjects:(NSString *)taskText;
+- (void)updateOnSignificantTimeChange;
+- (UILocalNotification *)localNotification;
 
 @end

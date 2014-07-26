@@ -46,6 +46,7 @@
 #import "ContextParser.h"
 #import "ProjectParser.h"
 #import "Task.h"
+#import "Util.h"
 
 @implementation TaskUtil
 
@@ -86,11 +87,13 @@
 + (NSInteger) badgeCount:(NSArray *)tasks which:(NSString * const)which
 {
 	NSInteger count = 0;
+    NSMutableArray *notifications = [NSMutableArray array];
 	
 	if (! [which isEqualToString:@"none"])
 	{
 		bool needA = [which isEqualToString:@"priorityA"];
 		bool needPriority = [which isEqualToString:@"anyPriority"];
+        bool needUpcoming = [which isEqualToString:@"upcoming"];
 		
 		for (Task* task in tasks) {
 			if (! task.completed) {
@@ -106,11 +109,35 @@
 					if (pname != PriorityNone)
 						++count;
 				}
+                else if (needUpcoming)
+                {
+                    if (task.isDue) {
+                        ++count;
+                    }
+                }
 				else
 					++count;
-			}	
+			}
+            UILocalNotification *n = [task localNotification];
+            if (n != nil) {
+                [notifications addObject:n];
+            }
 		}	
 	}
+
+    for (UILocalNotification *n in [UIApplication sharedApplication].scheduledLocalNotifications) {
+        if ([n.fireDate compare:[[NSDate alloc] init]] == NSOrderedDescending) {
+            [[UIApplication sharedApplication] cancelLocalNotification:n];
+        }
+    }
+    NSSortDescriptor *sd = [NSSortDescriptor sortDescriptorWithKey:@"fireDate" ascending:YES];
+    NSArray *sorted = [notifications sortedArrayUsingDescriptors:@[sd]];
+    long seq = count;
+    for (UILocalNotification *n in sorted) {
+        n.applicationIconBadgeNumber = ++seq;
+        [[UIApplication sharedApplication] scheduleLocalNotification:n];
+        //NSLog(@"notif %d %@ %@", n.applicationIconBadgeNumber, [Util stringFromDate:n.fireDate withFormat:@"yyyy-MM-dd"], n.alertBody);
+    }
 
 	return count;
 }

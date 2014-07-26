@@ -51,12 +51,26 @@
 #define COMPLETED_TXT @"x "
 #define TASK_DATE_FORMAT @"yyyy-MM-dd"
 
-@implementation Task
+NSDateFormatter *taskDateFormatter;
+
+@interface RepeatSpecification: NSObject
+@property NSDateComponents *interval;
+@property int lead;
+@property BOOL approx;
+@end
+
+@implementation RepeatSpecification
+@end
+
+@implementation Task {
+    NSDate *dueDate;
+}
 
 @synthesize originalText, originalPriority;
 @synthesize taskId, priority, deleted, completed, text;
 @synthesize completionDate, prependedDate, relativeAge;
-@synthesize contexts, projects;	
+@synthesize contexts, projects;
+@synthesize isDue, isOverdue, isWayOverdue, isPaused;
 
 - (void)populateWithTaskId:(NSUInteger)newId withRawText:(NSString*)rawText withDefaultPrependedDate:(NSDate*)date {
 	taskId = newId;
@@ -68,7 +82,8 @@
 	prependedDate = [splitResult prependedDate];
 	completed = [splitResult completed];
 	completionDate = [splitResult completedDate];
-	
+    dueDate = self.calculateDueDate;
+
 	contexts = [ContextParser parse:text];
 	projects = [ProjectParser parse:text];
 	deleted = [text length] == 0;
@@ -76,17 +91,26 @@
 	if (date && [prependedDate length] == 0) {
 		prependedDate = [Util stringFromDate:date withFormat:TASK_DATE_FORMAT];
 	}
-	
+
 	if ([prependedDate length] > 0) {
 		relativeAge = [RelativeDate 
 						stringWithDate:[Util dateFromString:prependedDate 
 										withFormat:TASK_DATE_FORMAT]];
 	}
-	
+
+    if (dueDate != nil) {
+        [self updateDueFlags];
+    }
+
 }
 
 - (id)initWithId:(NSUInteger)newID withRawText:(NSString*)rawText withDefaultPrependedDate:(NSDate*)date {
 	self = [super init];
+
+    if (taskDateFormatter == nil) {
+        taskDateFormatter = [[NSDateFormatter alloc] init];
+        taskDateFormatter.dateFormat = TASK_DATE_FORMAT;
+    }
 
 	if (self) {
 		[self populateWithTaskId:newID withRawText:rawText withDefaultPrependedDate:date];
@@ -107,10 +131,20 @@
 
 - (void)markComplete:(NSDate*)date {
 	if (!completed) {
-		priority = [Priority NONE];
-		completionDate = [Util stringFromDate:date withFormat:TASK_DATE_FORMAT];
-		deleted = NO;
-		completed = YES;		
+        RepeatSpecification *rep = self.repeatInterval;
+        if (dueDate != nil && rep != nil) {
+            NSCalendar *cal = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
+            if (rep.approx) {
+                [self updateDueDate:[cal dateByAddingComponents:rep.interval toDate:[[NSDate alloc] init] options:0]];
+            } else {
+                [self updateDueDate:[cal dateByAddingComponents:rep.interval toDate:dueDate options:0]];
+            }
+        } else {
+            priority = [Priority NONE];
+            completionDate = [Util stringFromDate:date withFormat:TASK_DATE_FORMAT];
+            deleted = NO;
+            completed = YES;
+        }
 	}
 }
 
@@ -119,6 +153,16 @@
 		completionDate = [NSString string];
 		completed = NO;
 	}
+}
+
+- (void)togglePause {
+    NSRegularExpression *re = [NSRegularExpression regularExpressionWithPattern:@"\\s+pause:\\S+\\b" options:0 error:nil];
+    NSTextCheckingResult *tcr = [re firstMatchInString:text options:0 range:NSMakeRange(0, text.length)];
+    if (tcr != nil) {
+        text = [text stringByReplacingCharactersInRange:tcr.range withString:@""];
+    } else {
+        text = [text stringByAppendingString:@" pause:1"];
+    }
 }
 
 - (void)deleteTask {
@@ -137,9 +181,27 @@
 			[ret appendString:@" "];
 		}		
 	}
-	
-	[ret appendString:text];
-	
+
+    [ret appendString:text];
+
+    NSRegularExpression *re = [NSRegularExpression regularExpressionWithPattern:@"\\s+due:\\S+\\b" options:0 error:nil];
+    NSTextCheckingResult *tcr = [re firstMatchInString:ret options:0 range:NSMakeRange(0, ret.length)];
+    if (tcr != nil) {
+        [ret deleteCharactersInRange:tcr.range];
+    }
+
+    re = [NSRegularExpression regularExpressionWithPattern:@"\\s+rep:\\S+\\b" options:0 error:nil];
+    tcr = [re firstMatchInString:ret options:0 range:NSMakeRange(0, ret.length)];
+    if (tcr != nil) {
+        [ret deleteCharactersInRange:tcr.range];
+    }
+
+    re = [NSRegularExpression regularExpressionWithPattern:@"\\s+pause:\\S+\\b" options:0 error:nil];
+    tcr = [re firstMatchInString:ret options:0 range:NSMakeRange(0, ret.length)];
+    if (tcr != nil) {
+        [ret deleteCharactersInRange:tcr.range];
+    }
+
 	return [ret copy];
 }
 
@@ -300,11 +362,29 @@
 - (NSComparisonResult) compareByPriority:(Task*)other {
 	NSUInteger thisPri = [self sortPriority];
 	NSUInteger otherPri = [other sortPriority];
-	
+
+    if (self.completed != other.completed) {
+        return self.completed ? NSOrderedDescending : NSOrderedAscending;
+    }
+    if (self.isWayOverdue != other.isWayOverdue) {
+        return self.isWayOverdue ? NSOrderedAscending : NSOrderedDescending;
+    }
+    if (self.isOverdue != other.isOverdue) {
+        return self.isOverdue ? NSOrderedAscending : NSOrderedDescending;
+    }
+    if (self.isDue != other.isDue) {
+        return self.isDue ? NSOrderedAscending : NSOrderedDescending;
+    }
+    if ((dueDate == nil) != (other->dueDate == nil)) {
+        return dueDate == nil ? NSOrderedAscending : NSOrderedDescending;
+    }
+
 	if (thisPri < otherPri) {
 		return NSOrderedAscending;
 	} else if (thisPri > otherPri) {
 		return NSOrderedDescending;
+    } else if (dueDate != nil && other->dueDate != nil) {
+        return [dueDate compare:other->dueDate];
 	} else {
 		return [self compareByIdAscending:other];
 	}
@@ -334,6 +414,130 @@
 - (NSArray *)rangesOfProjects:(NSString *)taskText
 {
     return [ProjectParser rangesOfProjectsForString:taskText];
+}
+
+- (NSDate *)calculateDueDate
+{
+    NSRegularExpression *repre = [NSRegularExpression regularExpressionWithPattern:@"\\bdue:(\\d{4}-\\d{2}-\\d{2})\\b" options:0 error:nil];
+    NSTextCheckingResult *tcr = [repre firstMatchInString:text options:0 range:NSMakeRange(0, text.length)];
+    if (tcr == nil) {
+        return nil;
+    }
+    return [Util dateFromString:[text substringWithRange:[tcr rangeAtIndex:1]] withFormat:TASK_DATE_FORMAT];
+}
+
+- (void)updateDueDate:(NSDate *)due
+{
+    NSRegularExpression *repre = [NSRegularExpression regularExpressionWithPattern:@"\\bdue:(\\d{4}-\\d{2}-\\d{2})\\b" options:0 error:nil];
+    NSTextCheckingResult *tcr = [repre firstMatchInString:text options:0 range:NSMakeRange(0, text.length)];
+    if (tcr == nil) {
+        return;
+    }
+    text = [text stringByReplacingCharactersInRange:[tcr rangeAtIndex:1] withString:[taskDateFormatter stringFromDate:due]];
+    dueDate = due;
+    [self updateDueFlags];
+}
+
+- (void)updateDueFlags
+{
+    NSDate *today = [[NSDate alloc] init];
+    NSDate *notify = self.notifyDate;
+    isDue = [notify compare:today] != NSOrderedDescending;
+    isOverdue = [dueDate compare:today] != NSOrderedDescending;
+    NSCalendar *cal = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
+    NSDateComponents *dc = [cal components:NSCalendarUnitDay fromDate:dueDate toDate:today options:0];
+    isWayOverdue = dc.day >= 14;
+    isPaused = [text rangeOfString:@"pause:1"].location != NSNotFound;
+
+    relativeAge = @"";
+    dc = [cal components:NSCalendarUnitDay fromDate:today toDate:dueDate options:0];
+    if ([today compare:dueDate] == NSOrderedAscending) {
+        dc.day++;
+        relativeAge = [relativeAge stringByAppendingString:[NSString stringWithFormat:@"%ld day%@ left", dc.day, dc.day > 1 ? @"s" : @""]];
+    } else if ([today compare:dueDate] == NSOrderedDescending && dc.day != 0) {
+        dc.day = -dc.day;
+        relativeAge = [relativeAge stringByAppendingString:[NSString stringWithFormat:@"%ld day%@ over", dc.day, dc.day > 1 ? @"s" : @""]];
+    }
+    relativeAge = [relativeAge stringByAppendingString:[NSString stringWithFormat:@" due %@", [taskDateFormatter stringFromDate:dueDate]]];
+    NSRegularExpression *re = [NSRegularExpression regularExpressionWithPattern:@"\\s+rep:(\\S+)\\b" options:0 error:nil];
+    NSTextCheckingResult *tcr = [re firstMatchInString:text options:0 range:NSMakeRange(0, text.length)];
+    if (tcr != nil) {
+        relativeAge = [relativeAge stringByAppendingString:[NSString stringWithFormat:@" rep %@", [text substringWithRange:[tcr rangeAtIndex:1]]]];
+    }
+}
+
+- (RepeatSpecification *)repeatInterval
+{
+    NSRegularExpression *repre = [NSRegularExpression regularExpressionWithPattern:@"\\brep:(~)?(\\d+)([dwmy])(;(\\d+)d)?\\b" options:0 error:nil];
+    NSTextCheckingResult *tcr = [repre firstMatchInString:text options:0 range:NSMakeRange(0, text.length)];
+    if (tcr == nil) {
+        return nil;
+    }
+    RepeatSpecification *r = [[RepeatSpecification alloc] init];
+
+    r.approx = [tcr rangeAtIndex:1].location != NSNotFound;
+
+    NSString *scount = [text substringWithRange:[tcr rangeAtIndex:2]];
+    NSString *sunit = [text substringWithRange:[tcr rangeAtIndex:3]];
+    long count = [scount integerValue];
+    NSDateComponents *dc = [[NSDateComponents alloc] init];
+    switch ([sunit characterAtIndex:0]) {
+        case 'd': dc.day = count; break;
+        case 'w': dc.week = count; break;
+        case 'm': dc.month = count; break;
+        case 'y': dc.year = count; break;
+    }
+    r.interval = dc;
+
+    if (r.approx) {
+        r.lead = 1;
+    } else {
+        NSRange range = [tcr rangeAtIndex:5];
+        if (range.location != NSNotFound) {
+            r.lead = [[text substringWithRange:range] integerValue];
+        } else {
+            int repeat = 0;
+            if (dc.day != NSUndefinedDateComponent) repeat += dc.day;
+            if (dc.week != NSUndefinedDateComponent) repeat += 7 * dc.week;
+            if (dc.month != NSUndefinedDateComponent) repeat += 30 * dc.month;
+            if (dc.year != NSUndefinedDateComponent) repeat += 365 * dc.year;
+            r.lead = floor(pow(repeat, 0.5));
+        }
+    }
+
+    return r;
+}
+
+- (NSDate *)notifyDate
+{
+    NSDate *notifydate = dueDate;
+    if (notifydate == nil) {
+        return nil;
+    }
+    NSCalendar *cal = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
+    RepeatSpecification *rep = self.repeatInterval;
+    NSDateComponents *dc = [[NSDateComponents alloc] init];
+    dc.day = rep != nil ? -rep.lead : -14;
+    return [cal dateByAddingComponents:dc toDate:notifydate options:0];
+}
+
+- (void)updateOnSignificantTimeChange
+{
+    if (dueDate != nil) {
+        [self updateDueFlags];
+    }
+}
+
+- (UILocalNotification *)localNotification
+{
+    NSDate *alert = self.notifyDate;
+    if ([alert compare:[[NSDate alloc] init]] != NSOrderedDescending) {
+        return nil;
+    }
+    UILocalNotification *notif = [[UILocalNotification alloc] init];
+    notif.fireDate = alert;
+    notif.alertBody = [self inScreenFormat];
+    return notif;
 }
 
 @end

@@ -77,6 +77,7 @@ typedef void(^RemoteOperationCompletionBlock)(BOOL success, NSError *error);
 - (void)pullFromRemoteWithCompletion:(RemoteOperationCompletionBlock)completion;
 - (BOOL)isManualMode;
 - (void)logout;
+- (void)applicationSignificantTimeChange:(UIApplication *)application;
 
 @end
 
