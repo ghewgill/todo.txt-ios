@@ -73,6 +73,7 @@
 @property (nonatomic, readonly) NSString *relativeAge;
 @property (nonatomic, readonly) NSArray *contexts;
 @property (nonatomic, readonly) NSArray *projects;
+@property (nonatomic, readonly) NSDate *dueDate;
 @property (nonatomic, readonly) BOOL isDue;
 @property (nonatomic, readonly) BOOL isOverdue;
 @property (nonatomic, readonly) BOOL isWayOverdue;
@@ -98,6 +99,7 @@
 - (NSComparisonResult) compareByTextAscending:(Task*)other;
 - (NSArray *)rangesOfContexts:(NSString *)taskText;
 - (NSArray *)rangesOfProjects:(NSString *)taskText;
+- (void)updateDueDate:(NSDate *)due;
 - (void)updateOnSignificantTimeChange;
 - (UILocalNotification *)localNotification;
 

@@ -444,6 +444,20 @@ static NSString *accessability = @"Task Details";
 	[self.textView becomeFirstResponder];
 }
 
+- (void) dueWasSelected:(NSDate *)due element:(id)element {
+    self.actionSheetPicker = nil;
+    if (due != nil) {
+        Task *t = [[Task alloc] initWithId:-1 withRawText:self.textView.text];
+        NSDate *old_due = t.dueDate;
+        if (old_due == nil) {
+            [t update:[t.inFileFormat stringByAppendingString:@" due:0000-00-00"]];
+        }
+        [t updateDueDate:due];
+        self.textView.text = t.inFileFormat;
+    }
+    [self.textView becomeFirstResponder];
+}
+
 - (IBAction) keyboardAccessoryButtonPressed:(id)sender {
 	
 	id<TaskBag> taskBag = self.appDelegate.taskBag;
@@ -504,6 +518,20 @@ static NSString *accessability = @"Task Details";
 																	  NSLog(@"Project Picker Canceled");
 																  }
 																	   origin:button];
+    } else if([button.title isEqualToString:@"Due"]) { // Due
+        Task *t = [[Task alloc] initWithId:-1 withRawText:self.textView.text];
+        NSDate *due = t.dueDate;
+        if (due == nil) {
+            due = [NSDate new];
+        }
+        /*self.actionSheetPicker = [ActionSheetPicker displayActionPickerWithView:self.view
+                                    datePickerMode:UIDatePickerModeDate
+                                      selectedDate:due
+                                            target:self
+                                            action:@selector(dueWasSelected:element:)
+                                             title:@"Select Due Date"
+                                              rect:CGRectZero
+                                     barButtonItem:button];*/
     }
 }
 

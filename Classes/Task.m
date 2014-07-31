@@ -62,15 +62,13 @@ NSDateFormatter *taskDateFormatter;
 @implementation RepeatSpecification
 @end
 
-@implementation Task {
-    NSDate *dueDate;
-}
+@implementation Task
 
 @synthesize originalText, originalPriority;
 @synthesize taskId, priority, deleted, completed, text;
 @synthesize completionDate, prependedDate, relativeAge;
 @synthesize contexts, projects;
-@synthesize isDue, isOverdue, isWayOverdue, isPaused;
+@synthesize dueDate, isDue, isOverdue, isWayOverdue, isPaused;
 
 - (void)populateWithTaskId:(NSUInteger)newId withRawText:(NSString*)rawText withDefaultPrependedDate:(NSDate*)date {
 	taskId = newId;
