@@ -143,6 +143,9 @@ NSDateFormatter *taskDateFormatter;
             deleted = NO;
             completed = YES;
         }
+        if (isPaused) {
+            [self togglePause];
+        }
 	}
 }
 
