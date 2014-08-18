@@ -98,6 +98,10 @@ static NSString *accessability = @"Task Details";
 	if (![self.appDelegate isManualMode]) {
 		[self.appDelegate syncClientWithCompletion:nil];
 	}
+
+    if (self.task.completed) {
+        self.textView.editable = NO;
+    }
 	
 	self.curInput = [[NSString alloc] init];	
 

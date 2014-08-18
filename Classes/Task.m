@@ -127,10 +127,12 @@ NSDateFormatter *taskDateFormatter;
 	[self populateWithTaskId:taskId withRawText:rawText withDefaultPrependedDate:nil];
 }
 
-- (void)markComplete:(NSDate*)date {
+- (Task *)markComplete:(NSDate*)date {
+    Task *doneTask = nil;
 	if (!completed) {
         RepeatSpecification *rep = self.repeatInterval;
         if (dueDate != nil && rep != nil) {
+            doneTask = [[Task alloc] initWithId:-1 withRawText:[NSString stringWithFormat:@"%@%@ %@", COMPLETED_TXT, [Util stringFromDate:date withFormat:TASK_DATE_FORMAT], self.inFileFormat]];
             NSCalendar *cal = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
             if (rep.approx) {
                 [self updateDueDate:[cal dateByAddingComponents:rep.interval toDate:[[NSDate alloc] init] options:0]];
@@ -147,6 +149,7 @@ NSDateFormatter *taskDateFormatter;
             [self togglePause];
         }
 	}
+    return doneTask;
 }
 
 - (void)markIncomplete {
@@ -434,7 +437,11 @@ NSDateFormatter *taskDateFormatter;
     if (tcr == nil) {
         return;
     }
-    text = [text stringByReplacingCharactersInRange:[tcr rangeAtIndex:1] withString:[taskDateFormatter stringFromDate:due]];
+    if (due != nil) {
+        text = [text stringByReplacingCharactersInRange:[tcr rangeAtIndex:1] withString:[taskDateFormatter stringFromDate:due]];
+    } else {
+        text = [text stringByReplacingCharactersInRange:tcr.range withString:@""];
+    }
     dueDate = due;
     [self updateDueFlags];
 }

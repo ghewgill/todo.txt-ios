@@ -244,9 +244,9 @@ static CGFloat const kIpadGroupedTableViewSideInset = 40;
 	
 	// Tapping the detail view triggers the update option
 	if (indexPath.section == 0) {
-		if (![task completed]) {
+		//if (![task completed]) {
 			[self didTapUpdateButton];
-		}
+		//}
 		return;
 	}
 	
@@ -315,8 +315,11 @@ static CGFloat const kIpadGroupedTableViewSideInset = 40;
 - (void) completeTask {
 	id<TaskBag> taskBag = self.appDelegate.taskBag;
 	Task* task = self.task;
-	[task markComplete:[NSDate date]];
+	Task *doneTask = [task markComplete:[NSDate date]];
 	[taskBag update:task];
+    if (doneTask != nil) {
+        [taskBag addAsTasks:@[doneTask.inFileFormat]];
+    }
 		
 	BOOL auto_archive = [[NSUserDefaults standardUserDefaults] boolForKey:@"auto_archive_preference"];
 	if (auto_archive) {

@@ -365,14 +365,18 @@ shouldReloadTableForSearchString:(NSString *)searchString
 {
     id<TaskBag> taskBag = self.appDelegate.taskBag;
     Task *task = [self taskForTable:tableView atIndex:indexPath.row];
-    
+
+    Task *doneTask = nil;
     if (task.completed) {
         [task markIncomplete];
     } else {
-        [task markComplete:[NSDate date]];
+        doneTask = [task markComplete:[NSDate date]];
     }
     
     [taskBag update:task];
+    if (doneTask != nil) {
+        [taskBag addAsTasks:@[doneTask.inFileFormat]];
+    }
 	
 	if ([[NSUserDefaults standardUserDefaults] boolForKey:@"auto_archive_preference"]) {
 		[taskBag archive];

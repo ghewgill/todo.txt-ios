@@ -84,7 +84,7 @@
 - (id)initWithId:(NSUInteger)newID withRawText:(NSString*)rawText withDefaultPrependedDate:(NSDate*)date;
 - (id)initWithId:(NSUInteger)taskID withRawText:(NSString*)rawText;
 - (void)update:(NSString*)rawText;
-- (void)markComplete:(NSDate*)date;
+- (Task *)markComplete:(NSDate*)date;
 - (void)markIncomplete;
 - (void)togglePause;
 - (void)deleteTask;
