@@ -113,15 +113,17 @@
 
 - (NSString *)priorityText
 {
-    if (!self.task.completed && self.task.isDue) {
+    if (!self.task.completed) {
         if (self.task.isPaused) {
             return @"\U0001f4a4"; // SLEEPING SYMBOL
-        } else if (self.task.isWayOverdue) {
-            return @"\U0001f4a2"; // ANGER SYMBOL
-        } else if (self.task.isOverdue) {
-            return @"\U0001f535"; // LARGE BLUE CIRCLE
-        } else {
-            return @"\u26a0"; // WARNING SIGN
+        } else if (self.task.isDue) {
+            if (self.task.isWayOverdue) {
+                return @"\U0001f4a2"; // ANGER SYMBOL
+            } else if (self.task.isOverdue) {
+                return @"\U0001f535"; // LARGE BLUE CIRCLE
+            } else {
+                return @"\u26a0"; // WARNING SIGN
+            }
         }
     }
     return [[self.task priority] listFormat];
