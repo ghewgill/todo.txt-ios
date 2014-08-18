@@ -450,7 +450,9 @@ static NSString *accessability = @"Task Details";
         Task *t = [[Task alloc] initWithId:-1 withRawText:self.textView.text];
         NSDate *old_due = t.dueDate;
         if (old_due == nil) {
-            [t update:[t.inFileFormat stringByAppendingString:@" due:0000-00-00"]];
+            NSString *newText = [Strings insertPaddedString:t.inFileFormat atRange:self.curSelectedRange withString:@"due:0000-00-00"];
+            self.curSelectedRange = [Strings calculateSelectedRange:self.curSelectedRange oldText:self.textView.text newText:newText];
+            t = [[Task alloc] initWithId:-1 withRawText:newText];
         }
         [t updateDueDate:due];
         self.textView.text = t.inFileFormat;
