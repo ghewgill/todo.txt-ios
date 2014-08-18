@@ -454,7 +454,7 @@ NSDateFormatter *taskDateFormatter;
         relativeAge = [relativeAge stringByAppendingString:[NSString stringWithFormat:@"%ld day%@ left", dc.day, dc.day > 1 ? @"s" : @""]];
     } else if ([today compare:dueDate] == NSOrderedDescending && dc.day != 0) {
         dc.day = -dc.day;
-        relativeAge = [relativeAge stringByAppendingString:[NSString stringWithFormat:@"%ld day%@ over", dc.day, dc.day > 1 ? @"s" : @""]];
+        relativeAge = [relativeAge stringByAppendingString:[NSString stringWithFormat:@"%ld day%@ past", dc.day, dc.day > 1 ? @"s" : @""]];
     }
     relativeAge = [relativeAge stringByAppendingString:[NSString stringWithFormat:@" due %@", [taskDateFormatter stringFromDate:dueDate]]];
     NSRegularExpression *re = [NSRegularExpression regularExpressionWithPattern:@"\\s+rep:(\\S+)\\b" options:0 error:nil];
