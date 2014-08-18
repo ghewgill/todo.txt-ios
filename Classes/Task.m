@@ -162,7 +162,7 @@ NSDateFormatter *taskDateFormatter;
     if (tcr != nil) {
         text = [text stringByReplacingCharactersInRange:tcr.range withString:@""];
     } else {
-        text = [text stringByAppendingString:@" pause:1"];
+        text = [text stringByAppendingString:[NSString stringWithFormat:@" pause:%@", [Util stringFromDate:[NSDate date] withFormat:TASK_DATE_FORMAT]]];
     }
 }
 
@@ -448,7 +448,7 @@ NSDateFormatter *taskDateFormatter;
     NSCalendar *cal = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
     NSDateComponents *dc = [cal components:NSCalendarUnitDay fromDate:dueDate toDate:today options:0];
     isWayOverdue = dc.day >= 14;
-    isPaused = [text rangeOfString:@"pause:1"].location != NSNotFound;
+    isPaused = [text rangeOfString:@"pause:"].location != NSNotFound;
 
     relativeAge = @"";
     dc = [cal components:NSCalendarUnitDay fromDate:today toDate:dueDate options:0];
