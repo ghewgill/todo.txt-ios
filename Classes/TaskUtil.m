@@ -117,12 +117,13 @@
                 }
 				else
 					++count;
+
+                UILocalNotification *n = [task localNotification];
+                if (n != nil) {
+                    [notifications addObject:n];
+                }
 			}
-            UILocalNotification *n = [task localNotification];
-            if (n != nil) {
-                [notifications addObject:n];
-            }
-		}	
+		}
 	}
 
     for (UILocalNotification *n in [UIApplication sharedApplication].scheduledLocalNotifications) {
