@@ -57,6 +57,7 @@ NSDateFormatter *taskDateFormatter;
 @property NSDateComponents *interval;
 @property int lead;
 @property BOOL approx;
+@property int tail;
 @end
 
 @implementation RepeatSpecification
@@ -454,7 +455,8 @@ NSDateFormatter *taskDateFormatter;
     isOverdue = [dueDate compare:today] != NSOrderedDescending;
     NSCalendar *cal = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
     NSDateComponents *dc = [cal components:NSCalendarUnitDay fromDate:dueDate toDate:today options:0];
-    isWayOverdue = dc.day >= 14;
+    RepeatSpecification *rep = self.repeatInterval;
+    isWayOverdue = dc.day >= (rep != nil ? rep.tail : 14);
     isPaused = [text rangeOfString:@"pause:"].location != NSNotFound;
 
     relativeAge = @"";
@@ -497,20 +499,23 @@ NSDateFormatter *taskDateFormatter;
     }
     r.interval = dc;
 
+    int repeat = 0;
+    if (dc.day != NSUndefinedDateComponent) repeat += dc.day;
+    if (dc.week != NSUndefinedDateComponent) repeat += 7 * dc.week;
+    if (dc.month != NSUndefinedDateComponent) repeat += 30 * dc.month;
+    if (dc.year != NSUndefinedDateComponent) repeat += 365 * dc.year;
+
     if (r.approx) {
         r.lead = 1;
+        r.tail = ceil(pow(repeat, 0.5));
     } else {
         NSRange range = [tcr rangeAtIndex:5];
         if (range.location != NSNotFound) {
             r.lead = [[text substringWithRange:range] integerValue];
         } else {
-            int repeat = 0;
-            if (dc.day != NSUndefinedDateComponent) repeat += dc.day;
-            if (dc.week != NSUndefinedDateComponent) repeat += 7 * dc.week;
-            if (dc.month != NSUndefinedDateComponent) repeat += 30 * dc.month;
-            if (dc.year != NSUndefinedDateComponent) repeat += 365 * dc.year;
             r.lead = floor(pow(repeat, 0.5));
         }
+        r.tail = 1;
     }
 
     return r;
