@@ -198,7 +198,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		0F75B415149912DF00848E27 /* Todo-txt-unit-tests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Todo-txt-unit-tests.octest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		0F75B415149912DF00848E27 /* Todo-txt-unit-tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Todo-txt-unit-tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0F75B41D149912DF00848E27 /* Todo-txt-unit-tests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Todo-txt-unit-tests-Info.plist"; sourceTree = "<group>"; };
 		0F75B41F149912DF00848E27 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		0F75B421149912DF00848E27 /* TaskUtilTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TaskUtilTest.h; sourceTree = "<group>"; };
@@ -532,7 +532,7 @@
 			isa = PBXGroup;
 			children = (
 				1D6058910D05DD3D006BFB54 /* Todo.txt.app */,
-				0F75B415149912DF00848E27 /* Todo-txt-unit-tests.octest */,
+				0F75B415149912DF00848E27 /* Todo-txt-unit-tests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1045,7 +1045,7 @@
 			);
 			name = "Todo-txt-unit-tests";
 			productName = "Todo-txt-unit-tests";
-			productReference = 0F75B415149912DF00848E27 /* Todo-txt-unit-tests.octest */;
+			productReference = 0F75B415149912DF00848E27 /* Todo-txt-unit-tests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		1D6058900D05DD3D006BFB54 /* Todo.txt */ = {

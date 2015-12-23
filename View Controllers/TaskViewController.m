@@ -342,7 +342,7 @@ static CGFloat const kIpadGroupedTableViewSideInset = 40;
     [task togglePause];
     [taskBag update:task];
 
-    [self.appDelegate pushToRemote];
+    [self.appDelegate pushToRemoteWithCompletion:nil];
 	[self performSelectorOnMainThread:@selector(reloadViewData) withObject:nil waitUntilDone:NO];
 }
 
