@@ -48,6 +48,7 @@
 #import "AsyncTask.h"
 #import "TodoTxtAppDelegate.h"
 #import "ActionSheetStringPicker.h"
+#import "ActionSheetDatePicker.h"
 #import "PlaceholderGenerator.h"
 #import "PriorityTextSplitter.h"
 #import "TaskUtil.h"
@@ -530,14 +531,16 @@ static NSString *accessability = @"Task Details";
         if (due == nil) {
             due = [NSDate new];
         }
-        /*self.actionSheetPicker = [ActionSheetPicker displayActionPickerWithView:self.view
-                                    datePickerMode:UIDatePickerModeDate
-                                      selectedDate:due
-                                            target:self
-                                            action:@selector(dueWasSelected:element:)
-                                             title:@"Select Due Date"
-                                              rect:CGRectZero
-                                     barButtonItem:button];*/
+        self.actionSheetPicker = [ActionSheetDatePicker showPickerWithTitle:@"Select Due Date"
+                                                             datePickerMode:UIDatePickerModeDate
+                                                               selectedDate:due
+                                                                  doneBlock:^(ActionSheetDatePicker *picker, NSDate *selectedDate, id origin) {
+                                                                      [self dueWasSelected:selectedDate element:origin];
+                                                                  }
+                                                                cancelBlock:^(ActionSheetDatePicker *picker) {
+                                                                    NSLog(@"Date Picker Canceled");
+                                                                }
+                                                                     origin:button];
     }
 }
 
