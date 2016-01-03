@@ -371,7 +371,6 @@ static CGFloat const kIpadGroupedTableViewSideInset = 40;
 
 - (void) didTapPauseButton {
     NSLog(@"didTapPauseButton called");
-    Task* task = [self task];
     [AsyncTask runTask:@selector(pauseTask) onTarget:self];
 }
 

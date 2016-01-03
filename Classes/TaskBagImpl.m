@@ -223,7 +223,7 @@ static Task* find(NSArray *tasks, Task *task) {
 }
 
 - (int) size {
-    return [self.tasks count];
+    return (int)[self.tasks count];
 }
 
 - (NSArray*) projects {

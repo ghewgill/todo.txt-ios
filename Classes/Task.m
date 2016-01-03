@@ -463,10 +463,10 @@ NSDateFormatter *taskDateFormatter;
     dc = [cal components:NSCalendarUnitDay fromDate:today toDate:dueDate options:0];
     if ([today compare:dueDate] == NSOrderedAscending) {
         dc.day++;
-        relativeAge = [relativeAge stringByAppendingString:[NSString stringWithFormat:@"%ld day%@ left", dc.day, dc.day > 1 ? @"s" : @""]];
+        relativeAge = [relativeAge stringByAppendingString:[NSString stringWithFormat:@"%ld day%@ left", (long)dc.day, dc.day > 1 ? @"s" : @""]];
     } else if ([today compare:dueDate] == NSOrderedDescending && dc.day != 0) {
         dc.day = -dc.day;
-        relativeAge = [relativeAge stringByAppendingString:[NSString stringWithFormat:@"%ld day%@ past", dc.day, dc.day > 1 ? @"s" : @""]];
+        relativeAge = [relativeAge stringByAppendingString:[NSString stringWithFormat:@"%ld day%@ past", (long)dc.day, dc.day > 1 ? @"s" : @""]];
     }
     relativeAge = [relativeAge stringByAppendingString:[NSString stringWithFormat:@" due %@", [taskDateFormatter stringFromDate:dueDate]]];
     NSRegularExpression *re = [NSRegularExpression regularExpressionWithPattern:@"\\s+rep:(\\S+)\\b" options:0 error:nil];
@@ -511,7 +511,7 @@ NSDateFormatter *taskDateFormatter;
     } else {
         NSRange range = [tcr rangeAtIndex:5];
         if (range.location != NSNotFound) {
-            r.lead = [[text substringWithRange:range] integerValue];
+            r.lead = (int)[[text substringWithRange:range] integerValue];
         } else {
             r.lead = floor(pow(repeat, 0.5));
         }
