@@ -371,15 +371,15 @@ NSDateFormatter *taskDateFormatter;
     if (self.completed != other.completed) {
         return self.completed ? NSOrderedDescending : NSOrderedAscending;
     }
-    if (self.isWayOverdue != other.isWayOverdue) {
-        return self.isWayOverdue ? NSOrderedAscending : NSOrderedDescending;
+    if ((self.isWayOverdue || self.isOverdue || self.isDue) != (other.isWayOverdue || other.isOverdue || other.isDue)) {
+        return (self.isWayOverdue || self.isOverdue || self.isDue) ? NSOrderedAscending : NSOrderedDescending;
     }
-    if (self.isOverdue != other.isOverdue) {
+    /*if (self.isOverdue != other.isOverdue) {
         return self.isOverdue ? NSOrderedAscending : NSOrderedDescending;
     }
     if (self.isDue != other.isDue) {
         return self.isDue ? NSOrderedAscending : NSOrderedDescending;
-    }
+    }*/
     if ((dueDate == nil) != (other->dueDate == nil)) {
         return dueDate == nil ? NSOrderedAscending : NSOrderedDescending;
     }
