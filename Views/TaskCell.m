@@ -61,7 +61,7 @@ static const CGFloat kTaskAndAgeVerticalSpacing = 0;
 
 static const CGFloat kAccessoryWidthEstimate = 35;
 static const CGFloat kAccessoryWidthEstimateLessThan7 = 20;
-static const CGFloat kAgeLabelWidth = 180;
+static const CGFloat kAgeLabelWidth = 250;
 
 static const CGFloat kAgeLabelHeight = 14;
 static const CGFloat kPriorityLabelHeight = 20;
