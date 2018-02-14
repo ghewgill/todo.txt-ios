@@ -183,13 +183,13 @@ static NSString * const kLoginScreenSegueNotAnimatedIdentifier = @"LoginScreenSe
 											 selector:@selector(reachabilityChanged) 
 												 name:kReachabilityChangedNotification object:nil];
     
-    if (![self.remoteClientManager.currentClient isAuthenticated]) {
-        // Show the login view during the next iteration of the run loop.
-        // It is too early to show the view at this point.
-        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-            [self presentLoginControllerAnimated:YES];
-        }];
-    }
+    //if (![self.remoteClientManager.currentClient isAuthenticated]) {
+    //    // Show the login view during the next iteration of the run loop.
+    //    // It is too early to show the view at this point.
+    //    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+    //        [self presentLoginControllerAnimated:YES];
+    //    }];
+    //}
 	
 
     UIViewController *rootViewController = self.window.rootViewController;
